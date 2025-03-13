@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Country Risk-Free Rate Calculator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>🌍 Country Risk-Free Rate Calculator 📈</h1>
+
+        <form method="POST">
+            <label for="country">Select Country:</label>
+            <select id="country" name="country" required>
+                <option value="" disabled selected>Select country</option>
+                {% for country in countries %}
+                    <option value="{{ country }}" {% if selected_country==country %}selected{% endif %}>{{ country }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="date">Select Date to Calculate RFR:</label>
+            <input type="date" id="date" name="date" value="{{selected_date}}" required>
+
+            <button type="submit">Calculate Risk-Free Rate</button>
+        </form>
+
+        {% if calculated %}
+            <div class="result">
+                <h2>Result for {{calculated.country}} (10-Year at {{calculated.chosen_date}})</h2>
+                <ul>
+                    <li>🎯 <strong>Maturity Date:</strong> {{calculated.maturity}}</li>
+                    <li>📌 <strong>Bond Name:</strong> {{calculated.bond_name}}</li>
+                    <li>💳 <strong>ISIN:</strong> {{calculated.isin}}</li>
+                    <li>✅ <strong>Yield-to-Maturity (Risk-Free Rate):</strong> {{calculated.ytm}}%</li>
+                </ul>
+                <h3>Rows used for calculation:</h3>
+                {{calculation_rows|safe}}
+            </div>
+        {% endif %}
+    </div>
+
+</body>
+</html>
