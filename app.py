@@ -12,7 +12,7 @@ df['Maturity'] = pd.to_datetime(df['Maturity'], errors='coerce')
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
-    country_list = sorted(df['Country'].dropna().unique().tolist())
+    country_list = sorted(df['Country_Name'].dropna().unique().tolist())
     calculated = None
     selected_country = ''
     selected_date = ''
@@ -28,7 +28,7 @@ def home():
 
             # Filter bonds carefully: Country match, Maturity valid, Yield present
             df_country = df[
-                (df['Country'] == selected_country) &
+                (df['Country_Name'] == selected_country) &
                 (~df['Maturity'].isna()) &
                 (~df['Indicative yield, %'].isna())
             ].copy()
