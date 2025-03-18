@@ -36,10 +36,30 @@
                     <li>💳 <strong>ISIN:</strong> {{calculated.isin}}</li>
                     <li>✅ <strong>Yield-to-Maturity (Risk-Free Rate):</strong> {{calculated.ytm}}%</li>
                 </ul>
-                <h3>Rows used for calculation:</h3>
-                {{calculation_rows|safe}}
+                <!-- <h3>Rows used for calculation:</h3>
+                {{calculation_rows|safe}} -->
             </div>
         {% endif %}
+        {% if nss_params %}
+            <div class="result">
+                <h2>NSS Curve Parameters ({{calculated.country}})</h2>
+                <table>
+                    <tr><th>Beta0</th><th>Beta1</th><th>Beta2</th><th>Beta3</th><th>Tau1</th><th>Tau2</th></tr>
+                    <tr>
+                        <td>{{nss_params.Beta0}}</td>
+                        <td>{{nss_params.Beta1}}</td>
+                        <td>{{nss_params.Beta2}}</td>
+                        <td>{{nss_params.Beta3}}</td>
+                        <td>{{nss_params.Tau1}}</td>
+                        <td>{{nss_params.Tau2}}</td>
+                    </tr>
+                </table>
+                {% if nss_plot_url %}
+                    <h3>Yield Curve Plot</h3>
+                    <img src="{{ url_for('static', filename='plots/' + nss_plot_url.split('/')[-1]) }}" alt="NSS Yield Curve" style="width:100%;max-width:650px;">
+                {% endif %}
+            </div>
+            {% endif %}
     </div>
 
 </body>
