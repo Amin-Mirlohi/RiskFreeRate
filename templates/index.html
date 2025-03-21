@@ -1,66 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Country Risk-Free Rate Calculator</title>
+    <title>🌏 Country Risk-Free Rate Calculator 🧮</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap">
+
+    <!-- Bootstrap 5 CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+
+    <!-- Your custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <link rel="icon" href="https://img.icons8.com/external-wanicon-lineal-color-wanicon/64/000000/external-earth-climate-change-wanicon-lineal-color-wanicon.png">
 </head>
+
 <body>
-    <div class="container">
-        <h1>🌍 Country Risk-Free Rate Calculator 📈</h1>
+    <div class="container main-container shadow-lg p-4">
+        <h1 class="mb-4">🌏 Country Risk-Free Rate Calculator 🧮</h1>
+
         {% if error_message %}
-            <div style="color:red; text-align:center; margin-bottom:10px; font-weight:bold;">
-                &#x26A0; {{ error_message }} &#x26A0;
+            <div class="alert alert-danger text-center">
+                ⚠️ {{ error_message }}
             </div>
         {% endif %}
-        <form method="POST">
-            <label for="country">Select Country:</label>
-            <select id="country" name="country" required>
-                <option value="" disabled selected>Select country</option>
-                {% for country in countries %}
-                    <option value="{{ country }}" {% if selected_country==country %}selected{% endif %}>{{ country }}</option>
-                {% endfor %}
-            </select>
 
-            <label for="date">Select Date to Calculate RFR:</label>
-            <input type="date" id="date" name="date" value="{{selected_date}}" required>
+        <form method="POST" class="card p-3 form-card shadow-sm mx-auto my-4">
+            <div class="my-2">
+                <label for="country" class="form-label">🌎 Select Country:</label>
+                <select id="country" name="country" class="form-select" required>
+                    <option value="" disabled selected>Select country</option>
+                    {% for country in countries %}
+                        <option value="{{ country }}" {% if selected_country == country %}selected{% endif %}>
+                            {{ country }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
 
-            <button type="submit">Calculate Risk-Free Rate</button>
+            <div class="my-2">
+                <label for="date" class="form-label">📅 Date to Calculate RFR:</label>
+                <input type="date" id="date" name="date" class="form-control" value="{{selected_date}}" required>
+            </div>
+            <div class="my-2">
+                <label for="specific_maturity" class="form-label">🔢 Specific Maturity (Optional, in years):</label>
+                <input type="text" id="specific_maturity" name="specific_maturity" class="form-control" placeholder="e.g., 10.5" value="{{user_specific_maturity}}">
+            </div>
+
+            <button type="submit" class="btn btn-primary animated-btn mt-3">🚀 Calculate Risk-Free Rate</button>
         </form>
 
-        {% if calculated %}
-            <div class="result">
-                <h2>Result for {{calculated.country}} (10-Year at {{calculated.chosen_date}})</h2>
-                <ul>
-                    <li>🎯 <strong>Maturity Date:</strong> {{calculated.maturity}}</li>
-                    <li>📌 <strong>Bond Name:</strong> {{calculated.bond_name}}</li>
-                    <li>💳 <strong>ISIN:</strong> {{calculated.isin}}</li>
-                    <li>✅ <strong>Yield-to-Maturity (Risk-Free Rate):</strong> {{calculated.ytm}}%</li>
-                </ul>
-                <!-- <h3>Rows used for calculation:</h3>
-                {{calculation_rows|safe}} -->
+        {% if nss_plot_base64 %}
+            <div class="text-center my-4">
+                <img src="data:image/png;base64,{{nss_plot_base64}}" class="shadow-sm rounded img-fluid curve-img" alt="Yield Curve"/>
             </div>
         {% endif %}
-        {% if nss_params %}
-            <div class="result">
-                <h2>NSS Curve Parameters ({{calculated.country}})</h2>
-                <table>
-                    <tr><th>Beta0</th><th>Beta1</th><th>Beta2</th><th>Beta3</th><th>Tau1</th><th>Tau2</th></tr>
-                    <tr>
-                        <td>{{nss_params.Beta0}}</td>
-                        <td>{{nss_params.Beta1}}</td>
-                        <td>{{nss_params.Beta2}}</td>
-                        <td>{{nss_params.Beta3}}</td>
-                        <td>{{nss_params.Tau1}}</td>
-                        <td>{{nss_params.Tau2}}</td>
-                    </tr>
+
+        {% if nss_values %}
+            <div class="table-responsive">
+                <table class="table table-hover shadow rounded text-center">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>Maturity 📆</th>
+                            <th>Yield (%) 💹</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for label, yield in nss_values %}
+                            <tr>
+                                <td>{{ label }}</td>
+                                <td>{{ yield }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
                 </table>
-                {% if nss_plot_url %}
-                    <h3>Yield Curve Plot</h3>
-                    <img src="{{ url_for('static', filename='plots/' + nss_plot_url.split('/')[-1]) }}" alt="NSS Yield Curve" style="width:100%;max-width:650px;">
-                {% endif %}
             </div>
-            {% endif %}
+        {% endif %}
+
+        {% if specific_maturity_yield %}
+            <div class="card result-card shadow-sm mt-4 p-3 text-center">
+                <h4>🌟 NSS Yield Result for Maturity: <strong>{{ user_specific_maturity }} years</strong></h4>
+                <p class="lead">
+                    Calculated NSS Yield: <strong>{{ specific_maturity_yield }} %</strong>
+                </p>
+            </div>
+        {% endif %}
+
+        {% if calculated %}
+            <div class="card result-card shadow-sm mt-4 p-3">
+                <h4 class="text-center">📌 Result for <strong>{{ calculated.country }}</strong> (10-Year at {{ calculated.chosen_date }}) 📌</h4>
+                <ul class="list-group my-3">
+                    <li class="list-group-item"><strong>Maturity Date:</strong> {{ calculated.maturity }}</li>
+                    <li class="list-group-item"><strong>Bond Name:</strong> {{ calculated.bond_name }}</li>
+                    <li class="list-group-item"><strong>ISIN:</strong> {{ calculated.isin }}</li>
+                    <li class="list-group-item list-group-item-success"><strong>Yield-to-Maturity (Risk-Free Rate):</strong> {{ calculated.ytm }}%</li>
+                </ul>
+            </div>
+        {% endif %}
+
+        {% if nss_params %}
+            <div class="card result-card shadow-sm mt-4 p-3 text-center">
+                <h4>NSS Curve Parameters ({{ calculated.country }}) 📊</h4>
+                <table class="table table-striped my-2">
+                    <thead>
+                        <tr>
+                            <th>Beta0</th><th>Beta1</th><th>Beta2</th><th>Beta3</th><th>Tau1</th><th>Tau2</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ nss_params.Beta0 }}</td>
+                            <td>{{ nss_params.Beta1 }}</td>
+                            <td>{{ nss_params.Beta2 }}</td>
+                            <td>{{ nss_params.Beta3 }}</td>
+                            <td>{{ nss_params.Tau1 }}</td>
+                            <td>{{ nss_params.Tau2 }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+      
     </div>
 
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
